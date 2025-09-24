@@ -17,30 +17,35 @@
 ## ✨ Features
 
 ### 🎯 **AI-Powered Content Creation**
+
 - **Smart Content Generation**: Create engaging posts with AI assistance
 - **Brand Voice Matching**: AI learns and adapts to your unique writing style
 - **Multi-Platform Optimization**: Content tailored for Twitter, LinkedIn, Instagram, and Facebook
 - **Template Library**: 50+ professionally crafted templates for various industries
 
 ### 📊 **Advanced Analytics & Insights**
+
 - **Real-time Performance Tracking**: Monitor engagement, reach, and growth metrics
 - **AI-Powered Insights**: Get personalized recommendations to boost performance
 - **Optimal Timing Analysis**: Discover the best times to post for maximum engagement
 - **Cross-Platform Analytics**: Unified dashboard for all your social accounts
 
 ### 📅 **Smart Scheduling & Calendar**
+
 - **Visual Content Calendar**: Plan and organize your content strategy
 - **Bulk Scheduling**: Schedule multiple posts across platforms simultaneously
 - **Auto-Posting**: Seamless integration with social media APIs
 - **Content Queue Management**: Organize and prioritize your content pipeline
 
 ### 🎨 **Modern User Experience**
+
 - **Responsive Design**: Perfect experience on desktop, tablet, and mobile
 - **Dark/Light Mode**: Customizable themes for comfortable usage
 - **Glass Morphism UI**: Modern, elegant interface with smooth animations
 - **Accessibility First**: WCAG compliant design for all users
 
 ### 👥 **Team Collaboration**
+
 - **Multi-User Support**: Collaborate with team members and clients
 - **Role-Based Permissions**: Control access levels for different team members
 - **Activity Tracking**: Monitor team actions and content approval workflows
@@ -51,23 +56,27 @@
 ## 🛠️ Tech Stack
 
 ### **Frontend**
+
 - **React 18** - Modern React with hooks and concurrent features
 - **TypeScript** - Type-safe development with enhanced IDE support
 - **Vite** - Lightning-fast build tool and development server
 - **Tailwind CSS** - Utility-first CSS framework for rapid styling
 
 ### **UI Components**
+
 - **shadcn/ui** - High-quality, accessible React components
 - **Radix UI** - Unstyled, accessible UI primitives
 - **Lucide React** - Beautiful, customizable icons
 - **Recharts** - Composable charting library for analytics
 
 ### **State Management & Routing**
+
 - **React Router DOM** - Declarative routing for React applications
 - **TanStack Query** - Powerful data synchronization for React
 - **React Hook Form** - Performant forms with easy validation
 
 ### **Styling & Animation**
+
 - **Tailwind CSS** - Utility-first CSS framework
 - **CSS Custom Properties** - Dynamic theming system
 - **Framer Motion** - Production-ready motion library (planned)
@@ -78,6 +87,7 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - **Node.js** (v18 or higher) - [Install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 - **npm** or **yarn** package manager
 - **Git** for version control
@@ -85,12 +95,14 @@
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-username/social-smart-ai.git
    cd social-smart-ai
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    # or
@@ -98,6 +110,7 @@
    ```
 
 3. **Start development server**
+
    ```bash
    npm run dev
    # or
@@ -159,6 +172,7 @@ social-smart-ai/
 ## 🎨 Design System
 
 ### **Color Palette**
+
 - **Primary**: Blue gradient (#3B82F6 → #8B5CF6)
 - **Success**: Green (#10B981)
 - **Warning**: Amber (#F59E0B)
@@ -166,11 +180,13 @@ social-smart-ai/
 - **Neutral**: Slate scale for text and backgrounds
 
 ### **Typography**
+
 - **Font Family**: Inter (system fallback)
 - **Responsive Scale**: Fluid typography using clamp()
 - **Font Weights**: 400 (normal), 500 (medium), 600 (semibold), 700 (bold)
 
 ### **Spacing & Layout**
+
 - **Grid System**: CSS Grid and Flexbox
 - **Responsive Breakpoints**: Mobile-first approach
 - **Container Sizes**: Fluid with max-width constraints
@@ -180,6 +196,7 @@ social-smart-ai/
 ## 🔧 Configuration
 
 ### **Environment Variables**
+
 Create a `.env.local` file in the root directory:
 
 ```env
@@ -197,6 +214,7 @@ VITE_GOOGLE_ANALYTICS_ID=your_ga_id
 ```
 
 ### **Customization**
+
 - **Themes**: Modify CSS custom properties in `src/index.css`
 - **Components**: Extend shadcn/ui components in `src/components/ui/`
 - **Layouts**: Customize application layout in `src/components/AppLayout.tsx`
@@ -206,12 +224,14 @@ VITE_GOOGLE_ANALYTICS_ID=your_ga_id
 ## 📱 Features Overview
 
 ### **Dashboard**
+
 - Real-time analytics overview
 - Quick action buttons for content creation
 - Recent activity feed
 - Performance highlights and insights
 
 ### **Content Creation**
+
 - AI-powered content generation
 - Multi-platform preview
 - Hashtag suggestions
@@ -219,6 +239,7 @@ VITE_GOOGLE_ANALYTICS_ID=your_ga_id
 - Brand voice customization
 
 ### **Analytics**
+
 - Engagement rate tracking
 - Follower growth analysis
 - Best posting times
@@ -226,12 +247,14 @@ VITE_GOOGLE_ANALYTICS_ID=your_ga_id
 - Export capabilities
 
 ### **Calendar**
+
 - Visual content planning
 - Drag-and-drop scheduling
 - Bulk operations
 - Team collaboration features
 
 ### **Templates**
+
 - Industry-specific templates
 - Customizable content blocks
 - Performance-based recommendations
@@ -242,11 +265,13 @@ VITE_GOOGLE_ANALYTICS_ID=your_ga_id
 ## 🚀 Deployment
 
 ### **Lovable Platform** (Recommended)
+
 1. Visit [Lovable Project](https://lovable.dev/projects/db9c4350-592b-442c-9066-aed23d9a3d18)
 2. Click **Share → Publish**
 3. Configure custom domain if needed
 
 ### **Manual Deployment**
+
 ```bash
 # Build for production
 npm run build
@@ -256,7 +281,9 @@ npm run build
 ```
 
 ### **Custom Domain**
+
 To connect a custom domain:
+
 1. Navigate to **Project > Settings > Domains**
 2. Click **Connect Domain**
 3. Follow the DNS configuration instructions
@@ -268,6 +295,7 @@ To connect a custom domain:
 We welcome contributions from the community! Here's how you can help:
 
 ### **Getting Started**
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
@@ -276,6 +304,7 @@ We welcome contributions from the community! Here's how you can help:
 6. Open a Pull Request
 
 ### **Development Guidelines**
+
 - Follow TypeScript best practices
 - Use ESLint and Prettier for code formatting
 - Write meaningful commit messages
@@ -283,6 +312,7 @@ We welcome contributions from the community! Here's how you can help:
 - Update documentation as needed
 
 ### **Code Style**
+
 - Use functional components with hooks
 - Implement proper TypeScript typing
 - Follow the established folder structure

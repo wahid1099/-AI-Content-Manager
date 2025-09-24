@@ -57,8 +57,7 @@ const CreatePost = () => {
   const [content, setContent] = useState("");
   const [prompt, setPrompt] = useState("");
   const [tone, setTone] = useState("Professional");
-  const [needImage, setNeedImage] = useState(false);
-  const [imageDescription, setImageDescription] = useState("");
+
   const [useBrandVoice, setUseBrandVoice] = useState(true);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -179,8 +178,6 @@ const CreatePost = () => {
         }),
         tone,
         hashtags: selectedHashtags,
-        needImage: needImage ? "true" : "false",
-        imageDescription: needImage ? imageDescription : undefined,
       };
 
       const response = await authAPI.generatePost(postData);
@@ -384,46 +381,22 @@ const CreatePost = () => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-3">
-                        <Label className="text-responsive-sm font-medium">
-                          Tone
-                        </Label>
-                        <Select value={tone} onValueChange={setTone}>
-                          <SelectTrigger className="focus-ring">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {toneOptions.map((option) => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-responsive-sm font-medium">
-                            Generate Image
-                          </Label>
-                          <Switch
-                            checked={needImage}
-                            onCheckedChange={setNeedImage}
-                          />
-                        </div>
-                        {needImage && (
-                          <Input
-                            placeholder="Describe the image you want..."
-                            value={imageDescription}
-                            onChange={(e) =>
-                              setImageDescription(e.target.value)
-                            }
-                            className="focus-ring text-responsive-sm"
-                          />
-                        )}
-                      </div>
+                    <div className="space-y-3">
+                      <Label className="text-responsive-sm font-medium">
+                        Tone
+                      </Label>
+                      <Select value={tone} onValueChange={setTone}>
+                        <SelectTrigger className="focus-ring">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {toneOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <Button

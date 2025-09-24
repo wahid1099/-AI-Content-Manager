@@ -60,8 +60,6 @@ export interface GeneratePostRequest {
   platforms: string[];
   tone: string;
   hashtags: string[];
-  needImage: string;
-  imageDescription?: string;
 }
 
 export interface GeneratedPost {

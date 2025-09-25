@@ -74,8 +74,32 @@ export interface GeneratedPost {
     hasImage: boolean;
   };
   status: string;
+  imageUrl?: string;
+  scheduledDate?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UpdatePostRequest {
+  prompt?: string;
+  platforms?: string[];
+  tone?: string;
+  hashtags?: string[];
+  generatedContent?: {
+    posts: Record<string, string>;
+    hasImage: boolean;
+  };
+  imageUrl?: string;
+  scheduledDate?: string;
+}
+
+export interface ImageUploadResponse {
+  success: boolean;
+  data?: {
+    url: string;
+    delete_url: string;
+  };
+  error?: string;
 }
 
 export interface GeneratePostResponse {
@@ -229,6 +253,218 @@ export const authAPI = {
     } catch (error) {
       console.error("Fetch posts error:", error);
       throw error;
+    }
+  },
+
+  async updatePost(
+    postId: string,
+    updateData: UpdatePostRequest
+  ): Promise<GeneratePostResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      console.log("Updating post with data:", updateData); // Debug log
+
+      const response = await fetch(`${API_BASE_URL}/social-posts/${postId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Log detailed error information
+        console.error("Update post failed:", {
+          status: response.status,
+          statusText: response.statusText,
+          data: data,
+        });
+
+        // Handle validation errors specifically
+        if (data.errors && Array.isArray(data.errors)) {
+          const errorMessages = data.errors
+            .map((err: unknown) => err.message)
+            .join(", ");
+          throw new Error(`Validation failed: ${errorMessages}`);
+        }
+
+        throw new Error(data.message || "Failed to update post");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Update post error:", error);
+      throw error;
+    }
+  },
+
+  async deletePost(
+    postId: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/social-posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete post");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Delete post error:", error);
+      throw error;
+    }
+  },
+
+  async getScheduledPosts(): Promise<GetPostsResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/social-posts/scheduled`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch scheduled posts");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch scheduled posts error:", error);
+      throw error;
+    }
+  },
+
+  async getPostsByPlatform(platform: string): Promise<GetPostsResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/social-posts/platform/${platform}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch posts by platform");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch posts by platform error:", error);
+      throw error;
+    }
+  },
+
+  async publishPost(postId: string): Promise<GeneratePostResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/social-posts/${postId}/publish`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to publish post");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Publish post error:", error);
+      throw error;
+    }
+  },
+
+  async uploadImageToImageBB(imageFile: File): Promise<ImageUploadResponse> {
+    try {
+      // ImageBB API key from environment variables
+      const IMAGEBB_API_KEY = import.meta.env.VITE_IMAGEBB_API_KEY;
+
+      if (!IMAGEBB_API_KEY) {
+        throw new Error(
+          "ImageBB API key not configured. Please add VITE_IMAGEBB_API_KEY to your .env file"
+        );
+      }
+
+      const formData = new FormData();
+      formData.append("image", imageFile);
+      formData.append("key", IMAGEBB_API_KEY);
+
+      const response = await fetch("https://api.imgbb.com/1/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error?.message || "Failed to upload image");
+      }
+
+      return {
+        success: true,
+        data: {
+          url: data.data.url,
+          delete_url: data.data.delete_url,
+        },
+      };
+    } catch (error) {
+      console.error("Image upload error:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to upload image",
+      };
     }
   },
 };

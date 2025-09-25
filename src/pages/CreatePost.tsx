@@ -47,6 +47,7 @@ import {
   RefreshCw,
   History,
   Edit,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -68,6 +69,9 @@ const CreatePost = () => {
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [generatedPosts, setGeneratedPosts] = useState<GeneratedPost[]>([]);
   const [activeTab, setActiveTab] = useState("create");
+  const [imageUrl, setImageUrl] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
 
   const suggestedHashtags = [
     "#AI",
@@ -157,6 +161,139 @@ const CreatePost = () => {
     } finally {
       setIsLoadingPosts(false);
     }
+  };
+
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      const response = await authAPI.uploadImageToImageBB(file);
+      if (response.success && response.data) {
+        setImageUrl(response.data.url);
+        toast.success("Image uploaded successfully!");
+      } else {
+        toast.error(response.error || "Failed to upload image");
+      }
+    } catch (error) {
+      console.error("Image upload error:", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleUpdatePost = async (postId: string) => {
+    if (!editingPostId) return;
+
+    try {
+      // Ensure all platforms have content for backend validation
+      const completeContent = ensureAllPlatformContent(platformContent);
+
+      const updateData = {
+        generatedContent: {
+          posts: completeContent,
+        },
+        imageUrl: imageUrl || undefined,
+        scheduledAt:
+          selectedDate && selectedTime
+            ? new Date(
+                `${selectedDate.toDateString()} ${selectedTime}`
+              ).toISOString()
+            : undefined,
+      };
+
+      console.log("Sending update data:", updateData); // Debug log
+
+      const response = await authAPI.updatePost(postId, updateData);
+      if (response.success) {
+        toast.success("Post updated successfully!");
+        setEditingPostId(null);
+        await loadUserPosts();
+      } else {
+        toast.error(response.message || "Failed to update post");
+      }
+    } catch (error) {
+      console.error("Update post error:", error);
+      toast.error("Failed to update post");
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      const response = await authAPI.deletePost(postId);
+      if (response.success) {
+        toast.success("Post deleted successfully!");
+        await loadUserPosts();
+      } else {
+        toast.error("Failed to delete post");
+      }
+    } catch (error) {
+      console.error("Delete post error:", error);
+      toast.error("Failed to delete post");
+    }
+  };
+
+  const handlePublishPost = async (postId: string) => {
+    try {
+      const response = await authAPI.publishPost(postId);
+      if (response.success) {
+        toast.success("Post published successfully!");
+        await loadUserPosts();
+      } else {
+        toast.error(response.message || "Failed to publish post");
+      }
+    } catch (error) {
+      console.error("Publish post error:", error);
+      toast.error("Failed to publish post");
+    }
+  };
+
+  const resetForm = () => {
+    setContent("");
+    setPrompt("");
+    setPlatformContent({});
+    setSelectedPlatforms([]);
+    setSelectedHashtags([]);
+    setImageUrl("");
+    setSelectedDate(undefined);
+    setSelectedTime("");
+    setEditingPostId(null);
+  };
+
+  // Helper function to ensure all platforms have content for backend validation
+  const ensureAllPlatformContent = (currentContent: Record<string, string>) => {
+    const allPlatforms = [
+      "facebook",
+      "twitter",
+      "linkedin",
+      "instagram",
+      "tiktok",
+    ];
+    const completeContent: Record<string, string> = {};
+
+    allPlatforms.forEach((platform) => {
+      completeContent[platform] = currentContent[platform] || "";
+    });
+
+    return completeContent;
   };
 
   const generateAIContent = async () => {
@@ -329,13 +466,40 @@ const CreatePost = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up">
           <div>
             <h1 className="text-responsive-3xl font-bold gradient-text">
-              Create New Post
+              {editingPostId ? "Edit Post" : "Create New Post"}
             </h1>
             <p className="text-muted-foreground text-responsive-base mt-2">
-              Craft engaging content with AI assistance
+              {editingPostId
+                ? "Update your existing post content and settings"
+                : "Craft engaging content with AI assistance"}
             </p>
           </div>
           <div className="flex items-center space-x-2">
+            {editingPostId && (
+              <>
+                <Button
+                  variant="outline"
+                  className="glass-hover interactive-subtle"
+                  onClick={resetForm}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  New Post
+                </Button>
+                <Button
+                  variant="outline"
+                  className="glass-hover interactive-subtle"
+                  onClick={() => {
+                    const completeContent =
+                      ensureAllPlatformContent(platformContent);
+                    console.log("Platform content:", platformContent);
+                    console.log("Complete content:", completeContent);
+                    toast.info("Check console for debug info");
+                  }}
+                >
+                  Debug
+                </Button>
+              </>
+            )}
             <Button
               variant="outline"
               className="glass-hover interactive-subtle"
@@ -349,9 +513,17 @@ const CreatePost = () => {
                 Object.keys(platformContent).length === 0 ||
                 !selectedPlatforms.length
               }
+              onClick={() => {
+                if (editingPostId) {
+                  handleUpdatePost(editingPostId);
+                } else {
+                  // Handle new post creation/scheduling
+                  toast.info("Post scheduling functionality to be implemented");
+                }
+              }}
             >
               <Send className="w-4 h-4 mr-2" />
-              Schedule Post
+              {editingPostId ? "Update Post" : "Schedule Post"}
             </Button>
           </div>
         </div>
@@ -549,13 +721,32 @@ const CreatePost = () => {
                           />
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-4">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="hidden"
+                                id="image-upload"
+                                disabled={isUploadingImage}
+                              />
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 className="interactive-subtle"
+                                disabled={isUploadingImage}
+                                onClick={() =>
+                                  document
+                                    .getElementById("image-upload")
+                                    ?.click()
+                                }
+                                type="button"
                               >
-                                <Image className="w-4 h-4 mr-2" />
-                                Media
+                                {isUploadingImage ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <Image className="w-4 h-4 mr-2" />
+                                )}
+                                {isUploadingImage ? "Uploading..." : "Media"}
                               </Button>
                               <Button
                                 variant="ghost"
@@ -578,6 +769,30 @@ const CreatePost = () => {
                               {content.length} characters
                             </span>
                           </div>
+
+                          {/* Image Preview */}
+                          {imageUrl && (
+                            <div className="mt-4 space-y-2">
+                              <Label className="text-responsive-sm font-medium">
+                                Attached Image
+                              </Label>
+                              <div className="relative inline-block">
+                                <img
+                                  src={imageUrl}
+                                  alt="Uploaded image"
+                                  className="max-w-full h-32 object-cover rounded-lg border"
+                                />
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  className="absolute top-1 right-1"
+                                  onClick={() => setImageUrl("")}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </CardContent>
@@ -918,10 +1133,22 @@ const CreatePost = () => {
                         </div>
                       )}
 
+                      {/* Image Preview */}
+                      {post.imageUrl && (
+                        <div className="mt-3">
+                          <img
+                            src={post.imageUrl}
+                            alt="Post image"
+                            className="w-full h-32 object-cover rounded-lg border"
+                          />
+                        </div>
+                      )}
+
                       <div className="flex items-center space-x-2 pt-2">
                         <Button
                           size="sm"
-                          className="flex-1 gradient-primary interactive"
+                          variant="outline"
+                          className="flex-1"
                           onClick={() => {
                             // Set platform content and main content
                             setPlatformContent(post.generatedContent.posts);
@@ -939,12 +1166,33 @@ const CreatePost = () => {
                             setSelectedHashtags(post.hashtags);
                             setPrompt(post.prompt);
                             setTone(post.tone);
+                            setImageUrl(post.imageUrl || "");
+                            setEditingPostId(post._id);
                             setActiveTab("create");
                             toast.success("Post loaded for editing");
                           }}
                         >
-                          <Edit className="w-4 h-4 mr-2" />
-                          Use This Post
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+
+                        {post.status === "draft" && (
+                          <Button
+                            size="sm"
+                            className="gradient-primary"
+                            onClick={() => handlePublishPost(post._id)}
+                          >
+                            <Send className="w-4 h-4 mr-1" />
+                            Publish
+                          </Button>
+                        )}
+
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDeletePost(post._id)}
+                        >
+                          <X className="w-4 h-4" />
                         </Button>
                       </div>
                     </CardContent>

@@ -63,14 +63,17 @@ export interface GeneratePostRequest {
 }
 
 export interface GeneratedPost {
-  id: string;
-  content: string;
+  _id: string;
+  prompt: string;
   platforms: string[];
   tone: string;
   hashtags: string[];
-  needImage: boolean;
-  imageDescription?: string;
-  imageUrl?: string;
+  userId: string;
+  generatedContent: {
+    posts: Record<string, string>;
+    hasImage: boolean;
+  };
+  status: string;
   createdAt: string;
   updatedAt: string;
 }

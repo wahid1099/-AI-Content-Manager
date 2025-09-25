@@ -57,7 +57,9 @@ const CreatePost = () => {
   const [content, setContent] = useState("");
   const [prompt, setPrompt] = useState("");
   const [tone, setTone] = useState("Professional");
-
+  const [platformContent, setPlatformContent] = useState<
+    Record<string, string>
+  >({});
   const [useBrandVoice, setUseBrandVoice] = useState(true);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -183,7 +185,20 @@ const CreatePost = () => {
       const response = await authAPI.generatePost(postData);
 
       if (response.success && response.data) {
-        setContent(response.data.content);
+        // Handle the new API response structure
+        const generatedPosts = response.data.generatedContent?.posts || {};
+        setPlatformContent(generatedPosts);
+
+        // Create a combined content showing all platforms
+        const combinedContent = Object.entries(generatedPosts)
+          .map(
+            ([platform, content]) =>
+              `**${platform.toUpperCase()}:**\n${content}`
+          )
+          .join("\n\n---\n\n");
+
+        setContent(combinedContent);
+
         toast.success("Content generated successfully!");
 
         // Refresh the posts list
@@ -203,7 +218,10 @@ const CreatePost = () => {
 
   const getCharacterCount = (platformId: string) => {
     const platform = platforms.find((p) => p.id === platformId);
-    return platform ? content.length : 0;
+    if (!platform) return 0;
+
+    const platformSpecificContent = platformContent[platform.name] || content;
+    return platformSpecificContent.length;
   };
 
   const getCharacterLimit = (platformId: string) => {
@@ -213,9 +231,13 @@ const CreatePost = () => {
 
   const getPlatformPreview = (platformId: string) => {
     const platform = platforms.find((p) => p.id === platformId);
-    if (!platform || !content) return null;
+    if (!platform) return null;
 
-    const charCount = getCharacterCount(platformId);
+    // Get platform-specific content or fall back to general content
+    const platformSpecificContent = platformContent[platform.name] || content;
+    if (!platformSpecificContent) return null;
+
+    const charCount = platformSpecificContent.length;
     const charLimit = getCharacterLimit(platformId);
     const isOverLimit = charCount > charLimit;
 
@@ -252,7 +274,7 @@ const CreatePost = () => {
               isOverLimit ? "text-destructive" : ""
             }`}
           >
-            {content}
+            {platformSpecificContent}
           </p>
 
           {selectedHashtags.length > 0 && (
@@ -323,7 +345,10 @@ const CreatePost = () => {
             </Button>
             <Button
               className="gradient-primary interactive"
-              disabled={!content || !selectedPlatforms.length}
+              disabled={
+                Object.keys(platformContent).length === 0 ||
+                !selectedPlatforms.length
+              }
             >
               <Send className="w-4 h-4 mr-2" />
               Schedule Post
@@ -423,8 +448,8 @@ const CreatePost = () => {
                   </CardContent>
                 </Card>
 
-                {/* Generated Content Editor */}
-                {content && (
+                {/* Generated Content Display */}
+                {Object.keys(platformContent).length > 0 && (
                   <Card className="glass-card animate-scale-in">
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
@@ -432,57 +457,129 @@ const CreatePost = () => {
                         <span>Generated Content</span>
                       </CardTitle>
                       <CardDescription>
-                        Review and edit your AI-generated content
+                        AI-generated content for each platform
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="space-y-3">
-                        <Label
-                          htmlFor="content"
-                          className="text-responsive-sm font-medium"
-                        >
-                          Post Content
-                        </Label>
-                        <Textarea
-                          id="content"
-                          placeholder="Edit your AI-generated content..."
-                          value={content}
-                          onChange={(e) => setContent(e.target.value)}
-                          rows={8}
-                          className="resize-none focus-ring text-responsive-sm"
-                        />
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="interactive-subtle"
-                            >
-                              <Image className="w-4 h-4 mr-2" />
-                              Media
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="interactive-subtle"
-                            >
-                              <Video className="w-4 h-4 mr-2" />
-                              Video
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="interactive-subtle"
-                            >
-                              <Smile className="w-4 h-4 mr-2" />
-                              Emoji
-                            </Button>
+                      {Object.entries(platformContent).map(
+                        ([platform, content]) => (
+                          <div key={platform} className="space-y-3">
+                            <div className="flex items-center space-x-2">
+                              <Badge
+                                variant="outline"
+                                className="text-sm font-medium"
+                              >
+                                {platform.charAt(0).toUpperCase() +
+                                  platform.slice(1)}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {content.length} characters
+                              </span>
+                            </div>
+                            <div className="p-4 bg-muted/20 rounded-xl border border-border/20">
+                              <p className="text-sm whitespace-pre-wrap font-mono leading-relaxed">
+                                {content}
+                              </p>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="interactive-subtle"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(content);
+                                    toast.success(
+                                      `${platform} content copied to clipboard!`
+                                    );
+                                  }}
+                                >
+                                  📋 Copy
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="interactive-subtle"
+                                  onClick={() => {
+                                    setContent(content);
+                                    toast.success(
+                                      `Loaded ${platform} content for editing`
+                                    );
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4 mr-1" />
+                                  Edit
+                                </Button>
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {platforms.find(
+                                  (p) =>
+                                    p.name.toLowerCase() ===
+                                    platform.toLowerCase()
+                                )?.limit &&
+                                  `${content.length}/${
+                                    platforms.find(
+                                      (p) =>
+                                        p.name.toLowerCase() ===
+                                        platform.toLowerCase()
+                                    )?.limit
+                                  } chars`}
+                              </div>
+                            </div>
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            {content.length} characters
-                          </span>
+                        )
+                      )}
+
+                      {/* Combined Content Editor */}
+                      {content && (
+                        <div className="space-y-3 border-t pt-6">
+                          <Label
+                            htmlFor="content"
+                            className="text-responsive-sm font-medium"
+                          >
+                            Edit Content
+                          </Label>
+                          <Textarea
+                            id="content"
+                            placeholder="Edit your selected content..."
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            rows={6}
+                            className="resize-none focus-ring text-responsive-sm"
+                          />
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="interactive-subtle"
+                              >
+                                <Image className="w-4 h-4 mr-2" />
+                                Media
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="interactive-subtle"
+                              >
+                                <Video className="w-4 h-4 mr-2" />
+                                Video
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="interactive-subtle"
+                              >
+                                <Smile className="w-4 h-4 mr-2" />
+                                Emoji
+                              </Button>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {content.length} characters
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </CardContent>
                   </Card>
                 )}
@@ -667,7 +764,8 @@ const CreatePost = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {selectedPlatforms.length === 0 || !content ? (
+                    {selectedPlatforms.length === 0 ||
+                    (!content && Object.keys(platformContent).length === 0) ? (
                       <div className="text-center py-12 animate-fade-in">
                         <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Eye className="w-8 h-8 text-muted-foreground opacity-50" />
@@ -748,7 +846,7 @@ const CreatePost = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-responsive">
                 {generatedPosts.map((post, index) => (
                   <Card
-                    key={post.id}
+                    key={post._id}
                     className="glass-card interactive-subtle animate-scale-in"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
@@ -778,10 +876,27 @@ const CreatePost = () => {
                     </CardHeader>
 
                     <CardContent className="space-y-4">
-                      <div className="p-3 bg-muted/20 rounded-xl border border-border/20">
-                        <p className="text-sm line-clamp-4 font-mono">
-                          {post.content}
-                        </p>
+                      <div className="space-y-3">
+                        <div className="text-xs font-medium text-muted-foreground mb-2">
+                          Prompt: {post.prompt}
+                        </div>
+                        {Object.entries(post.generatedContent.posts).map(
+                          ([platform, content]) => (
+                            <div
+                              key={platform}
+                              className="p-3 bg-muted/20 rounded-xl border border-border/20"
+                            >
+                              <div className="flex items-center space-x-2 mb-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {platform}
+                                </Badge>
+                              </div>
+                              <p className="text-sm line-clamp-3 font-mono">
+                                {content}
+                              </p>
+                            </div>
+                          )
+                        )}
                       </div>
 
                       {post.hashtags.length > 0 && (
@@ -803,26 +918,27 @@ const CreatePost = () => {
                         </div>
                       )}
 
-                      {post.imageUrl && (
-                        <div className="relative">
-                          <img
-                            src={post.imageUrl}
-                            alt={post.imageDescription || "Generated image"}
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                        </div>
-                      )}
-
                       <div className="flex items-center space-x-2 pt-2">
                         <Button
                           size="sm"
                           className="flex-1 gradient-primary interactive"
                           onClick={() => {
-                            setContent(post.content);
+                            // Set platform content and main content
+                            setPlatformContent(post.generatedContent.posts);
+                            const firstPlatform = Object.keys(
+                              post.generatedContent.posts
+                            )[0];
+                            if (firstPlatform) {
+                              setContent(
+                                post.generatedContent.posts[firstPlatform]
+                              );
+                            }
                             setSelectedPlatforms(
                               post.platforms.map((p) => p.toLowerCase())
                             );
                             setSelectedHashtags(post.hashtags);
+                            setPrompt(post.prompt);
+                            setTone(post.tone);
                             setActiveTab("create");
                             toast.success("Post loaded for editing");
                           }}

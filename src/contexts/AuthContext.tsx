@@ -10,6 +10,7 @@ import {
   tokenStorage,
   userStorage,
   logout as logoutUtil,
+  authAPI,
 } from "@/lib/auth";
 
 interface AuthContextType {
@@ -66,8 +67,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(userData);
   };
 
-  const logout = () => {
-    logoutUtil();
+  const logout = async () => {
+    try {
+      await authAPI.logoutUser();
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback to local logout
+      logoutUtil();
+    }
     setUser(null);
   };
 

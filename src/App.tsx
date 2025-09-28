@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
+import GoogleCallback from "./pages/GoogleCallback";
 import Dashboard from "./pages/Dashboard";
 import CreatePost from "./pages/CreatePost";
 import Analytics from "./pages/Analytics";
@@ -30,6 +31,10 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
+              <Route
+                path="/auth/google/callback"
+                element={<GoogleCallback />}
+              />
               <Route
                 path="/dashboard"
                 element={

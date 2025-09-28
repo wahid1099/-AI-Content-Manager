@@ -125,6 +125,101 @@ export interface GetPostsResponse {
 
 // API calls
 export const authAPI = {
+  // Google OAuth
+  async initiateGoogleLogin(): Promise<void> {
+    try {
+      // Redirect to Google OAuth endpoint
+      window.location.href = `${API_BASE_URL}/auth/google`;
+    } catch (error) {
+      console.error("Google OAuth initiation error:", error);
+      throw error;
+    }
+  },
+
+  async handleGoogleCallback(
+    code: string,
+    state?: string
+  ): Promise<AuthResponse> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/google/callback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code, state }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Google OAuth callback failed");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Google OAuth callback error:", error);
+      throw error;
+    }
+  },
+
+  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Token refresh failed");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      throw error;
+    }
+  },
+
+  async logoutUser(): Promise<{ success: boolean; message: string }> {
+    try {
+      const token = getAccessToken();
+
+      if (token) {
+        const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.warn("Logout API call failed:", data.message);
+          // Continue with local logout even if API call fails
+        }
+      }
+
+      // Always clear local storage
+      tokenStorage.remove();
+      userStorage.remove();
+
+      return { success: true, message: "Logged out successfully" };
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Clear local storage even if API call fails
+      tokenStorage.remove();
+      userStorage.remove();
+      return { success: true, message: "Logged out locally" };
+    }
+  },
+
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/users/create-user`, {

@@ -385,7 +385,12 @@ export const authAPI = {
         // Handle validation errors specifically
         if (data.errors && Array.isArray(data.errors)) {
           const errorMessages = data.errors
-            .map((err: unknown) => err.message)
+            .map((err: unknown) => {
+              if (typeof err === "object" && err !== null && "message" in err) {
+                return (err as { message: string }).message;
+              }
+              return String(err);
+            })
             .join(", ");
           throw new Error(`Validation failed: ${errorMessages}`);
         }

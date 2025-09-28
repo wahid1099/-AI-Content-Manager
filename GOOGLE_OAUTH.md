@@ -35,11 +35,10 @@ The application now supports Google OAuth login alongside the existing email/pas
 
 ### Backend API Endpoints
 
-The frontend expects these backend endpoints to be implemented:
+The frontend integrates with these backend endpoints:
 
 ```
 GET  /api/v1/auth/google              - Start Google OAuth
-GET  /api/v1/auth/google/callback     - OAuth callback
 POST /api/v1/auth/login               - Regular login
 POST /api/v1/auth/register            - User registration
 POST /api/v1/auth/refresh-token       - Refresh access token
@@ -47,18 +46,23 @@ POST /api/v1/auth/logout              - Logout user
 GET  /api/v1/auth/profile             - Get user profile
 ```
 
+### Callback URLs
+
+The backend redirects to:
+
+- `/auth/callback?token=...&user=...` - Actual implementation with token and user data
+
 ## User Flow
 
-### Google OAuth Login Flow
+### Google OAuth Login Flow (Actual Implementation)
 
 1. User clicks "Google" button on login page
 2. Frontend calls `authAPI.initiateGoogleLogin()`
-3. User is redirected to Google OAuth consent screen
-4. After consent, Google redirects to `/auth/google/callback?code=...`
-5. `GoogleCallback` component processes the callback
-6. Frontend calls `authAPI.handleGoogleCallback(code)`
-7. Backend exchanges code for tokens and returns user data
-8. Frontend stores tokens and redirects to dashboard
+3. User is redirected to Google OAuth consent screen (`/api/v1/auth/google`)
+4. After consent, backend processes OAuth and redirects to `/auth/callback?token=...&user=...`
+5. `AuthCallback` component processes the callback with token and user data
+6. Frontend parses URL parameters and stores authentication data
+7. User is logged in and redirected to dashboard
 
 ### Regular Login Flow (Unchanged)
 

@@ -18,6 +18,10 @@ import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
 import Calendar from "./pages/Calendar";
 import Templates from "./pages/Templates";
+import Subscription from "./pages/Subscription";
+import Team from "./pages/Team";
+import ConnectedAccounts from "./pages/ConnectedAccounts";
+import Usage from "./pages/Usage";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +94,38 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Templates />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/subscription"
+                element={
+                  <ProtectedRoute>
+                    <Subscription />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/team"
+                element={
+                  <ProtectedRoute>
+                    <Team />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/connected-accounts"
+                element={
+                  <ProtectedRoute>
+                    <ConnectedAccounts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/usage"
+                element={
+                  <ProtectedRoute>
+                    <Usage />
                   </ProtectedRoute>
                 }
               />

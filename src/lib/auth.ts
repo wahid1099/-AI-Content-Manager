@@ -61,6 +61,11 @@ export interface GeneratePostRequest {
   platforms: string[];
   tone: string;
   hashtags: string[];
+  needImage?: string;
+  imageDescription?: string;
+  brandVoice?: string;
+  targetAudience?: string;
+  scheduledDate?: string;
 }
 
 export interface GeneratedPost {
@@ -122,6 +127,274 @@ export interface GetPostsResponse {
     total: number;
     totalPages: number;
   };
+}
+
+// Subscription Management Interfaces
+export interface Subscription {
+  id: string;
+  userId: string;
+  planId: string;
+  planName: string;
+  status: "active" | "inactive" | "cancelled" | "past_due";
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  priceId: string;
+  amount: number;
+  currency: string;
+  interval: "month" | "year";
+  features: string[];
+  limits: {
+    postsPerMonth: number;
+    aiGenerationsPerMonth: number;
+    teamMembers: number;
+    socialAccounts: number;
+  };
+  usage: {
+    postsUsed: number;
+    aiGenerationsUsed: number;
+    teamMembersUsed: number;
+    socialAccountsUsed: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  interval: "month" | "year";
+  features: string[];
+  limits: {
+    postsPerMonth: number;
+    aiGenerationsPerMonth: number;
+    teamMembers: number;
+    socialAccounts: number;
+  };
+  popular?: boolean;
+  stripePriceId: string;
+}
+
+export interface SubscriptionResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: Subscription;
+}
+
+export interface PlansResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: SubscriptionPlan[];
+}
+
+// Team Collaboration Interfaces
+export interface TeamMember {
+  id: string;
+  userId: string;
+  workspaceId: string;
+  email: string;
+  name: string;
+  role: "owner" | "admin" | "editor" | "viewer";
+  permissions: string[];
+  status: "active" | "pending" | "inactive";
+  invitedBy: string;
+  joinedAt?: string;
+  lastActive?: string;
+  avatar?: string;
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
+  description?: string;
+  ownerId: string;
+  settings: {
+    brandVoice?: string;
+    defaultTone?: string;
+    approvalRequired: boolean;
+    allowedPlatforms: string[];
+  };
+  members: TeamMember[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: TeamMember[];
+}
+
+export interface WorkspaceResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: Workspace;
+}
+
+// Analytics Interfaces
+export interface AnalyticsData {
+  overview: {
+    totalPosts: number;
+    totalEngagement: number;
+    totalReach: number;
+    totalImpressions: number;
+    engagementRate: number;
+    followerGrowth: number;
+  };
+  platformStats: {
+    platform: string;
+    posts: number;
+    engagement: number;
+    reach: number;
+    engagementRate: number;
+  }[];
+  timeSeriesData: {
+    date: string;
+    posts: number;
+    engagement: number;
+    reach: number;
+    impressions: number;
+  }[];
+  topPerformingPosts: {
+    id: string;
+    content: string;
+    platform: string;
+    engagement: number;
+    reach: number;
+    createdAt: string;
+  }[];
+  audienceInsights: {
+    demographics: {
+      ageGroups: { range: string; percentage: number }[];
+      genders: { gender: string; percentage: number }[];
+      locations: { country: string; percentage: number }[];
+    };
+    interests: { category: string; percentage: number }[];
+    activeHours: { hour: number; engagement: number }[];
+  };
+}
+
+export interface AnalyticsResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: AnalyticsData;
+}
+
+// Template Interfaces
+export interface Template {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  industry: string;
+  content: string;
+  platforms: string[];
+  tone: string;
+  hashtags: string[];
+  variables: string[];
+  performance: {
+    uses: number;
+    avgEngagement: number;
+    rating: number;
+  };
+  isPremium: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TemplateResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: Template[];
+}
+
+// Connected Accounts Interfaces
+export interface ConnectedAccount {
+  id: string;
+  userId: string;
+  platform: string;
+  accountId: string;
+  accountName: string;
+  username: string;
+  avatar?: string;
+  accessToken: string;
+  refreshToken?: string;
+  expiresAt?: string;
+  status: "active" | "expired" | "error";
+  permissions: string[];
+  connectedAt: string;
+  lastUsed?: string;
+}
+
+export interface ConnectedAccountsResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: ConnectedAccount[];
+}
+
+// Usage Analytics Interfaces
+export interface UsageMetrics {
+  currentPeriod: {
+    postsCreated: number;
+    aiGenerations: number;
+    apiCalls: number;
+    storageUsed: number;
+  };
+  limits: {
+    postsPerMonth: number;
+    aiGenerationsPerMonth: number;
+    apiCallsPerMonth: number;
+    storageLimit: number;
+  };
+  history: {
+    date: string;
+    postsCreated: number;
+    aiGenerations: number;
+    apiCalls: number;
+  }[];
+}
+
+export interface UsageResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: UsageMetrics;
+}
+
+// System Health Interfaces
+export interface SystemHealth {
+  status: "healthy" | "degraded" | "down";
+  services: {
+    database: "healthy" | "degraded" | "down";
+    ai: "healthy" | "degraded" | "down";
+    storage: "healthy" | "degraded" | "down";
+    external_apis: "healthy" | "degraded" | "down";
+  };
+  metrics: {
+    uptime: number;
+    responseTime: number;
+    errorRate: number;
+    activeUsers: number;
+  };
+  lastChecked: string;
+}
+
+export interface HealthResponse {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: SystemHealth;
 }
 
 // API calls
@@ -566,6 +839,478 @@ export const authAPI = {
         error:
           error instanceof Error ? error.message : "Failed to upload image",
       };
+    }
+  },
+
+  // Subscription Management APIs
+  async getSubscriptionPlans(): Promise<PlansResponse> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/subscriptions/plans`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch subscription plans");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch subscription plans error:", error);
+      throw error;
+    }
+  },
+
+  async getCurrentSubscription(): Promise<SubscriptionResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/subscriptions/current`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch subscription");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch subscription error:", error);
+      throw error;
+    }
+  },
+
+  async createSubscription(planId: string): Promise<SubscriptionResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/subscriptions/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ planId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create subscription");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Create subscription error:", error);
+      throw error;
+    }
+  },
+
+  async cancelSubscription(): Promise<SubscriptionResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/subscriptions/cancel`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to cancel subscription");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Cancel subscription error:", error);
+      throw error;
+    }
+  },
+
+  // Team Collaboration APIs
+  async getWorkspace(): Promise<WorkspaceResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/workspaces/current`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch workspace");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch workspace error:", error);
+      throw error;
+    }
+  },
+
+  async inviteTeamMember(email: string, role: string): Promise<TeamResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/team/invite`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email, role }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to invite team member");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Invite team member error:", error);
+      throw error;
+    }
+  },
+
+  async getTeamMembers(): Promise<TeamResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/team/members`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch team members");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch team members error:", error);
+      throw error;
+    }
+  },
+
+  async removeTeamMember(memberId: string): Promise<TeamResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/team/members/${memberId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to remove team member");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Remove team member error:", error);
+      throw error;
+    }
+  },
+
+  // Analytics APIs
+  async getAnalytics(timeRange: string = "30d"): Promise<AnalyticsResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/analytics?timeRange=${timeRange}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch analytics");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch analytics error:", error);
+      throw error;
+    }
+  },
+
+  // Templates APIs
+  async getTemplates(
+    category?: string,
+    industry?: string
+  ): Promise<TemplateResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      let url = `${API_BASE_URL}/templates`;
+      const params = new URLSearchParams();
+      if (category) params.append("category", category);
+      if (industry) params.append("industry", industry);
+      if (params.toString()) url += `?${params.toString()}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch templates");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch templates error:", error);
+      throw error;
+    }
+  },
+
+  async createTemplate(
+    templateData: Partial<Template>
+  ): Promise<TemplateResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/templates`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(templateData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create template");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Create template error:", error);
+      throw error;
+    }
+  },
+
+  // Connected Accounts APIs
+  async getConnectedAccounts(): Promise<ConnectedAccountsResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/connected-accounts`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch connected accounts");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch connected accounts error:", error);
+      throw error;
+    }
+  },
+
+  async connectSocialAccount(
+    platform: string
+  ): Promise<{ success: boolean; redirectUrl: string }> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/connected-accounts/connect/${platform}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to initiate account connection"
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Connect social account error:", error);
+      throw error;
+    }
+  },
+
+  async disconnectSocialAccount(
+    accountId: string
+  ): Promise<ConnectedAccountsResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/connected-accounts/${accountId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to disconnect account");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Disconnect social account error:", error);
+      throw error;
+    }
+  },
+
+  // Usage Analytics APIs
+  async getUsageMetrics(): Promise<UsageResponse> {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("No access token available");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/usage/metrics`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch usage metrics");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch usage metrics error:", error);
+      throw error;
+    }
+  },
+
+  // System Health APIs
+  async getSystemHealth(): Promise<HealthResponse> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system/health`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch system health");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Fetch system health error:", error);
+      throw error;
     }
   },
 };

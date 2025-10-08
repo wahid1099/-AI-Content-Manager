@@ -8,6 +8,10 @@ import {
   BookOpen,
   Sparkles,
   LogOut,
+  Crown,
+  Users,
+  Link2,
+  TrendingUp,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -33,6 +37,13 @@ const mainItems = [
   { title: "Calendar", url: "/calendar", icon: Calendar },
   { title: "Templates", url: "/templates", icon: BookOpen },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
+];
+
+const businessItems = [
+  { title: "Team", url: "/team", icon: Users },
+  { title: "Connected Accounts", url: "/connected-accounts", icon: Link2 },
+  { title: "Usage", url: "/usage", icon: TrendingUp },
+  { title: "Subscription", url: "/subscription", icon: Crown },
 ];
 
 const accountItems = [
@@ -61,6 +72,50 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {mainItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) =>
+                        `group flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-spring transform hover:scale-[1.01] ${
+                          isActive
+                            ? "gradient-primary text-primary-foreground shadow-glow"
+                            : "hover:bg-primary/10 text-slate-700 dark:text-foreground/80 hover:text-slate-900 dark:hover:text-foreground"
+                        }`
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <item.icon
+                            className={`w-5 h-5 transition-spring ${
+                              isActive
+                                ? "text-primary-foreground"
+                                : "text-slate-500 dark:text-muted-foreground group-hover:text-primary"
+                            }`}
+                          />
+                          <span className="font-medium text-responsive-sm">
+                            {item.title}
+                          </span>
+                        </>
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <Separator className="my-4 bg-border/30" />
+
+        {/* Business Navigation */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold text-slate-600 dark:text-muted-foreground uppercase tracking-wider mb-3">
+            Business
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {businessItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink

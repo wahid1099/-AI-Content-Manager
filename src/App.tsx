@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import GoogleCallback from "./pages/GoogleCallback";
 import AuthCallback from "./pages/AuthCallback";
+import OAuthCallback from "./pages/OAuthCallback";
 import Dashboard from "./pages/Dashboard";
 import CreatePost from "./pages/CreatePost";
 import Analytics from "./pages/Analytics";
@@ -41,6 +42,7 @@ const App = () => (
                 element={<GoogleCallback />}
               />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/oauth/callback/:platform" element={<OAuthCallback />} />
               <Route
                 path="/dashboard"
                 element={
